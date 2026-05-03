@@ -30,7 +30,7 @@ def main():
     print("🧠 Memória inicializálása és VPS szinkronizáció...")
     memory_manager_path = os.path.join(script_dir, "ENVIRONMENT_SETUP", "agent_memory_manager.py")
     if os.path.exists(memory_manager_path):
-        subprocess.run([sys.executable, memory_manager_path, "--action", "sync"])
+        subprocess.run([sys.executable, memory_manager_path, "--action", "start_session"])
         
     print("🚀 A Worker készen áll a felhő-parancsokra!")
     print("Kérlek, olvasd el az AGENTS_MX.md-t és húzd le az első Swarm Jobot az MCP-ről!")
