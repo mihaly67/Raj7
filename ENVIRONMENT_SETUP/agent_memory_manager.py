@@ -32,8 +32,7 @@ def write_memory(category: str, content: str):
     # Atomi írás szimulálása: megpróbáljuk fájl zárolással vagy gyors append-el
     try:
         with open(MEMORY_FILE, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(entry) + "
-")
+            f.write(json.dumps(entry) + "\n")
             f.flush()
             os.fsync(f.fileno()) # Biztosítjuk, hogy fizikailag is a lemezre kerüljön az OS bufferből
         print(f"🧠 Memória elmentve a lemezre (fsync biztosítva)! Kategória: {category}")
@@ -46,8 +45,7 @@ def mark_session(event: str):
     timestamp = datetime.datetime.now().isoformat()
     entry = {"timestamp": timestamp, "category": "SESSION_MARKER", "content": event}
     with open(MEMORY_FILE, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(entry) + "
-")
+        f.write(json.dumps(entry) + "\n")
     print(f"🔄 Session marker bejegyezve: {event}")
 
 def read_memory(limit: int = 10, category_filter: str = None):
@@ -92,8 +90,7 @@ def format_memory_for_agent(entries, exec_time=None):
     if not entries:
         return "A memória jelenleg üres vagy nem található releváns bejegyzés."
 
-    output = "🧠 === AGENT HOSSZÚTÁVÚ MEMÓRIA === 🧠
-"
+    output = "🧠 === AGENT HOSSZÚTÁVÚ MEMÓRIA === 🧠\n"
 
     total_chars = 0
     for idx, entry in enumerate(entries, 1):
@@ -102,41 +99,27 @@ def format_memory_for_agent(entries, exec_time=None):
 
         # Ha Session Marker
         if cat == "SESSION_MARKER":
-            output += f"[{idx}] {entry.get('timestamp', '')[:19]} | 🛑 {cont} 🛑
-"
+            output += f"[{idx}] {entry.get('timestamp', '')[:19]} | 🛑 {cont} 🛑\n"
         else:
-            output += f"[{idx}] {entry.get('timestamp', '')[:10]} | Téma: {cat}
-"
-            output += f"    Tartalom: {cont}
-"
+            output += f"[{idx}] {entry.get('timestamp', '')[:10]} | Téma: {cat}\n"
+            output += f"    Tartalom: {cont}\n"
 
-        output += "-" * 50 + "
-"
+        output += "-" * 50 + "\n"
         total_chars += len(cont)
 
     # Hallucináció és teljesítmény protokoll
     est_tokens = total_chars // 4
-    output += f"
-📊 MEMÓRIA METRIKÁK:
-"
+    output += f"\n📊 MEMÓRIA METRIKÁK:\n"
     if exec_time is not None:
-        output += f"⏱️ Visszaolvasási idő: {exec_time:.4f} másodperc
-"
-    output += f"📏 Teljes karakterszám: {total_chars} (~ {est_tokens} Token)
-"
+        output += f"⏱️ Visszaolvasási idő: {exec_time:.4f} másodperc\n"
+    output += f"📏 Teljes karakterszám: {total_chars} (~ {est_tokens} Token)\n"
 
     if est_tokens > 8000:
-         output += "
-🔴 KRITIKUS FIGYELMEZTETÉS: A memóriából felolvasott kontextus meghaladta a 8000 tokent!
-"
-         output += "   VESZÉLY: Fokozott hallucináció kockázata. A fizikai kontextusablakod betelhet.
-"
-         output += "   AKCIÓ: A következő lépésben futtass egy 'Condense' (Sűrítés) műveletet, vagy csökkentsd a --limit paramétert a read parancsnál!
-"
+         output += "\n🔴 KRITIKUS FIGYELMEZTETÉS: A memóriából felolvasott kontextus meghaladta a 8000 tokent!\n"
+         output += "   VESZÉLY: Fokozott hallucináció kockázata. A fizikai kontextusablakod betelhet.\n"
+         output += "   AKCIÓ: A következő lépésben futtass egy 'Condense' (Sűrítés) műveletet, vagy csökkentsd a --limit paramétert a read parancsnál!\n"
     elif est_tokens > 5000:
-         output += "
-🟡 FIGYELEM: A memóriából felolvasott kontextus meghaladta az 5000 tokent. Figyelj a fókuszvesztésre!
-"
+         output += "\n🟡 FIGYELEM: A memóriából felolvasott kontextus meghaladta az 5000 tokent. Figyelj a fókuszvesztésre!\n"
 
     return output
 
@@ -150,8 +133,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     def do_sync():
-        print("
-🤖 [Kontextus Titkár] Lokális memória felhő-szinkronizáció indítása...")
+        print("\n🤖 [Kontextus Titkár] Lokális memória felhő-szinkronizáció indítása...")
         try:
             import subprocess, sys
             p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "skills", "context_secretary.py")
@@ -183,8 +165,7 @@ if __name__ == "__main__":
         print(format_memory_for_agent(entries, exec_time))
 
         # Add a strict protocol reminder for the agent after reading memory
-        print("
-" + "="*70)
+        print("\n" + "="*70)
         print("🚨 AGENT PROTOCOL ENFORCEMENT: CONTEXT WINDOW EXTENSION 🚨")
         print("="*70)
         print("MINDEN 5. FORDULÓBAN (TURN) VAGY LOGIKAI SZAKASZ VÉGÉN KÖTELEZŐ ÍRNOD Ebbe a fájlba!")
