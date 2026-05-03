@@ -5,9 +5,21 @@ import argparse
 import datetime
 import subprocess
 
-# Kiderítjük, hogy melyik repóban futunk
-repo_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MEMORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Knowledge_Base', f'agent_memory_{repo_name}.jsonl')
+# A lokális fájlnévnek agent_memory.jsonl-nek KELL lennie a rendszer többi scriptje miatt.
+MEMORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Knowledge_Base', 'agent_memory.jsonl')
+
+def get_repo_name():
+    # Megpróbáljuk git confignól
+    try:
+        url = subprocess.check_output(['git', 'config', '--get', 'remote.origin.url'], stderr=subprocess.DEVNULL).decode('utf-8').strip()
+        if url:
+            # git@github.com:mihaly67/raj1.git -> raj1
+            name = url.split('/')[-1].replace('.git', '')
+            return name
+    except:
+        pass
+    # Fallback mappa névből
+    return os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def init_memory_file():
     os.makedirs(os.path.dirname(MEMORY_FILE), exist_ok=True)
@@ -25,7 +37,8 @@ def write_memory(category: str, content: str):
     }
     try:
         with open(MEMORY_FILE, 'a', encoding='utf-8') as f:
-            f.write(json.dumps(entry) + '\n')
+            f.write(json.dumps(entry) + '
+')
             f.flush()
             os.fsync(f.fileno())
         print(f'🧠 Memória elmentve a lemezre: {category}')
@@ -37,7 +50,8 @@ def mark_session(event: str):
     timestamp = datetime.datetime.now().isoformat()
     entry = {'timestamp': timestamp, 'category': 'SESSION_MARKER', 'content': event}
     with open(MEMORY_FILE, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(entry) + '\n')
+        f.write(json.dumps(entry) + '
+')
     print(f'🔄 Session marker bejegyezve: {event}')
 
 def read_memory(limit: int = 10, category_filter: str = None):
@@ -67,33 +81,42 @@ def read_memory(limit: int = 10, category_filter: str = None):
 def format_memory_for_agent(entries, exec_time=None):
     if not entries:
         return 'A memória jelenleg üres.'
-    output = '🧠 === AGENT HOSSZÚTÁVÚ MEMÓRIA === 🧠\n'
+    output = '🧠 === AGENT HOSSZÚTÁVÚ MEMÓRIA === 🧠
+'
     total_chars = 0
     for idx, entry in enumerate(entries, 1):
         cat = entry.get('category', 'Általános')
         cont = entry.get('content', '')
         if cat == 'SESSION_MARKER':
-            output += f'[{idx}] {entry.get("timestamp", "")[:19]} | 🛑 {cont} 🛑\n'
+            output += f'[{idx}] {entry.get("timestamp", "")[:19]} | 🛑 {cont} 🛑
+'
         else:
-            output += f'[{idx}] {entry.get("timestamp", "")[:10]} | Téma: {cat}\n    Tartalom: {cont}\n'
-        output += '-' * 50 + '\n'
+            output += f'[{idx}] {entry.get("timestamp", "")[:10]} | Téma: {cat}
+    Tartalom: {cont}
+'
+        output += '-' * 50 + '
+'
         total_chars += len(cont)
     return output
 
 def do_sync():
     print('🤖 [Kontextus Titkár] Lokális memória VPS felhő-szinkronizáció indítása...')
     try:
-        bridge_script = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tools', 'skills', 'mcp_bridge_tool.py')
-        if not os.path.exists(bridge_script):
-            print('⚠️ mcp_bridge_tool.py nem található, kihagyom az MCP szinkronizációt.')
+        vps_bridge = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tools', 'vps_bridge.py')
+        if not os.path.exists(vps_bridge):
+            print('⚠️ vps_bridge.py nem található, kihagyom az SFTP szinkronizációt.')
             return
             
-        with open(MEMORY_FILE, 'r', encoding='utf-8') as f:
-            content = f.read()
-            
-        # Call the remote MCP server to save this memory under the repo's specific memory file
-        subprocess.run([sys.executable, bridge_script, 'execute_bash', f"mkdir -p ~/Jules_mx/memory_offload && cat << 'INNER_EOF' > ~/Jules_mx/memory_offload/backup_{repo_name}.jsonl\n{content}\nINNER_EOF"], check=False)
-        print('✅ Lokális memória sikeresen felszinkronizálva a VPS-re.')
+        repo_name = get_repo_name()
+        vps_target = f"/home/misi/Jules_mx/memory_offload/backup_{repo_name}.jsonl"
+        
+        # Mappa letrehozasa a szerveren
+        subprocess.run([sys.executable, vps_bridge, "mkdir -p /home/misi/Jules_mx/memory_offload"], check=False, stdout=subprocess.DEVNULL)
+        
+        # Fajl feltoltese upload moddal az escape anomaliak elkerulese erdekeben
+        subprocess.run([sys.executable, vps_bridge, "--upload", MEMORY_FILE, vps_target], check=False, stdout=subprocess.DEVNULL)
+        
+        print('✅ Lokális memória sikeresen felszinkronizálva a VPS-re (Izolált formában).')
     except Exception as e:
         print(f'⚠️ Hiba a memória szinkronizációjakor: {e}')
 
