@@ -1,22 +1,25 @@
 import subprocess
 import sys
 import json
+import shlex
 
 def run_mcp_tool(tool_name, tool_args):
     try:
         from vps_bridge import run_on_vps
     except ImportError:
         import os
-        sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+        sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         try:
              from vps_bridge import run_on_vps
         except:
-             return "Hiba: vps_bridge nem talalhato."
+             return "Hiba: vps_bridge nem talalhato a Python path-ban."
              
-    # Építjük az argparse-mentes hívást
-    args_json = json.dumps(tool_args).replace('"', '\"')
+    # A JSON payload escape-elése bash híváshoz, hogy a bonyolult stringek ne hasaljanak el.
+    args_json = json.dumps(tool_args)
+    safe_args = shlex.quote(args_json)
     
-    cmd = f"mcp call {tool_name} --args '{args_json}'"
+    # Invoke the mcp cli on the VPS
+    cmd = f"mcp call {tool_name} --args {safe_args}"
     success, output = run_on_vps(cmd)
     
     return output
