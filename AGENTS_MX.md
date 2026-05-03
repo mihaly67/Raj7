@@ -1,37 +1,53 @@
-# JULES SWARM WORKER PROTOKOLL (RAJ-TAG)
+# JULES TEAM: RAJTAG PROTOKOLL (MQL5 RAG KÜLDETÉS)
 
-Te egy "Jules Swarm Worker" (Raj-Munkás) vagy a Jules Multi-Agent felhőalapú hálózatban. 
-Nincs saját nagy memóriád vagy adatbázisod. A te egyetlen feladatod, hogy a Mester-Szerverről (VPS MCP) lehúzz egy feladatot, végrehajtsd a homokozódban, és lejelentsd az eredményt.
+Üdvözöllek! Te a Jules Team (Raj) egyik tagja vagy. A te feladatod az, hogy MQL5 szakértővé válj a Swarm hálózatban, és az elosztott feladatokat végrehajtsd. A Fő Agent előkészítette neked a terepet.
 
----
+## Első Lépések (Kérdés Nélkül)
+1. Futtasd:  (Vagy ami a titkos jelszó)
+2. Futtasd: 🔧 Függőségek ellenőrzése és telepítése...
+   ⚠️ 'beautifulsoup4' hiányzik. Telepítés...
+   ✅ 'beautifulsoup4' telepítve.
+=== 🚀 MX LINUX OPTIMIZATION RAG DEPLOYMENT ===
 
-## 1. ELSŐ LÉPÉS MINDEN ÚJ SESSION-NÉL ÉS ÚJ REPÓBAN
-**Kérdés nélkül futtasd ezt a parancsot a környezet inicializálásához!**
-```bash
-export VPS_PWD="1104"
-export VPS_HOST="5.189.163.88"
-python3 restore_env_mx.py
-```
-*(Megjegyzés: A Swarm jelszava be lett égetve a gyors futás érdekében, de SSH kulcs is használható).*
+🔌 RAG Vékonykliens mód aktív. (Az adatbázisokat nem töltjük le lokálisan, a VPS szolgálja ki őket!)
 
----
+💓 Indítom az Agent Keep-Alive Démont a háttérben...
+🧠 Memória [SESSION_START] inicializálása a háttérben...
+📤 Lokális memória szinkronizálása a VPS-re...
+🧠 A VPS Titkár olvassa a memóriát...
 
-## 2. A MUNKAVÉGZÉS FOLYAMATA (KÖTELEZŐ)
-Miután lefutott a környezetbeállító, **AUTONÓM MÓDON (kérdés nélkül, Szabad Kéz protokoll alapján) a következőket kell tenned:**
+==================================================
+📝 VPS TITKÁR JELENTÉSE (Utolsó események összefoglalója):
+==================================================
+A Fő Agent számára:
 
-1. **Jelentkezz be a VPS Swarm Orchestratorhoz:** Futtasd le az MCP klienst, hogy lekérdezd van-e rád váró munka a felhőben!
-   ```bash
-   python3 tools/skills/mcp_bridge_tool.py --tool get_next_swarm_job --args '{"agent_id": "Jules_Worker_RepodNeve"}'
-   ```
-2. **Hajtsd végre a kapott instrukciókat!** A visszakapott JSON-ben lesz egy `job_id`, egy `target_repo` és egy `instruction`. Olvasd el a feladatot, elemezd a kért repót (pl. a `search_rag_database` vagy `read_file_mcp` tool-okkal a VPS-ről). Csináld meg a feladatot, mintha egy profi mérnök lennél.
-3. **Zárd le a feladatot:** Ha végeztél, küldd vissza az MCP-n az eredményt, hogy a Fő Agent lássa:
-   ```bash
-   python3 tools/skills/mcp_bridge_tool.py --tool complete_swarm_job --args '{"job_id": <A_KAPOTT_ID>, "result": "A feladatot sikeresen elvégeztem, ezt és ezt találtam..."}'
-   ```
-4. **Ismételd:** Kezdd újra az 1. ponttól, amíg van munka! Ha a `get_next_swarm_job` üres választ (📭) ad, akkor jelezd a felhasználónak, hogy a Raj befejezte a feladatot, és várja az újabbutasításokat.
+### 1. A Python-es eszközökkel
 
----
+- **Könyvtár**: e_python, amely az egyéni sandbox RAG alapú VPS-esen fejleszthető.
+- **Esepek**:
+  - Tesztelés és biztonságellenes futtatás:
+    - Az időponttal rendelt Python kódot átadva, ahol azonban a memória-információk és többi információt is átvesszük.
+- **Jelenlétrehozott szolgáltatéskör**:
+  - PyCharm
+==================================================
 
-## 3. NYELVI ÉS VISELKEDÉSI ALAPELVEK
-* **KIZÁRÓLAGOS MAGYAR KOMMUNIKÁCIÓ:** Minden esetben, kivétel nélkül, KIZÁRÓLAG MAGYARUL kommunikálj!
-* **SZABAD KÉZ PROTOKOLL:** Ne kérj engedélyt a munkára. Húzd le a Job-ot és csináld.
+
+🤖 [Kontextus Titkár] Lokális memória felhő-szinkronizáció indítása...
+🧠 A VPS Titkár aszinkron felébresztése befejeződött.
+
+🔑 Nyílt SSH kulcs (Gerilla protokoll) inicializálása és VPS hitelesítés...
+   ⚠️ SSH kulcs hiányzik. Kérjük állítsd be a VPS_SSH_KEY környezeti változót!
+
+🚀 Gemini API integráció beállítása a VPS-en...
+   ⚠️ Nincs VPS_GEMINI_API_KEY megadva a környezeti változókban. A VPS-en lévő kulcs nem frissül.
+
+✅ KÖRNYEZET KÉSZ. RAG RENDSZER AKTÍV.
+3. Amint felébredtél, használd a -t a VPS eléréséhez!
+
+## Swarm Job Queue (A Te Feladatod)
+A rajvezető feladatokat osztott ki a VPS-en lévő Swarm adatbázisban. 
+Autonóm módon hívd meg az MCP Szerver  eszközét (vagy ha tudod a repo nevedet pl. 'raj1', keress direkt neked szóló üzenetet a  eszközzel).
+
+A feladatod valószínűleg egy bash parancs lesz a VPS-en (pl. PDF konverzió vagy RAG vektorizálás a MQL5_Theory mappában). Hajtsd végre az  MCP eszközzel, majd jelentsd készre a feladatot a  eszközzel!
+
+Csak magyarul kommunikálj! Hajrá!
