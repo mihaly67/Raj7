@@ -8,6 +8,19 @@ from pathlib import Path
 # A memória fájl helye (A Git repó része lesz, így a sessionök között perzisztens marad)
 MEMORY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Knowledge_Base", "agent_memory.jsonl")
 
+def get_repo_name():
+    # Megpróbáljuk git confignól kinyerni
+    try:
+        import subprocess
+        url = subprocess.check_output(['git', 'config', '--get', 'remote.origin.url'], stderr=subprocess.DEVNULL).decode('utf-8').strip()
+        if url:
+            name = url.split('/')[-1].replace('.git', '')
+            return name
+    except:
+        pass
+    # Fallback mappa névből
+    return os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 def init_memory_file():
     """Létrehozza a memóriafájlt, ha még nem létezik."""
     os.makedirs(os.path.dirname(MEMORY_FILE), exist_ok=True)
@@ -136,10 +149,23 @@ if __name__ == "__main__":
         print("\n🤖 [Kontextus Titkár] Lokális memória felhő-szinkronizáció indítása...")
         try:
             import subprocess, sys
-            p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "skills", "context_secretary.py")
-            if os.path.exists(p): subprocess.run([sys.executable, p], check=False)
+            vps_bridge = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools", "vps_bridge.py")
+            if not os.path.exists(vps_bridge):
+                print("⚠️ vps_bridge.py nem található, kihagyom az SFTP szinkronizációt.")
+                return
+
+            repo_name = get_repo_name()
+            vps_target = f"/home/misi/Jules_mx/memory_offload/backup_{repo_name}.jsonl"
+
+            # Mappa letrehozasa a szerveren
+            subprocess.run([sys.executable, vps_bridge, "mkdir -p /home/misi/Jules_mx/memory_offload"], check=False, stdout=subprocess.DEVNULL)
+
+            # Fajl feltoltese upload moddal
+            subprocess.run([sys.executable, vps_bridge, "--upload", MEMORY_FILE, vps_target], check=False, stdout=subprocess.DEVNULL)
+
+            print("✅ Lokális memória sikeresen felszinkronizálva a VPS-re (Izolált formában).")
         except Exception as e:
-            print(f"⚠️ Hiba a Titkár hívásakor: {e}")
+            print(f"⚠️ Hiba a memória szinkronizációjakor: {e}")
 
     if args.action == "write":
         if not args.content:

@@ -151,7 +151,7 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     log_file_path = os.path.join(script_dir, "supervisor.log")
     keepalive_path = os.path.join(script_dir, "tools", "agent_keepalive.py")
-    
+
     if os.path.exists(keepalive_path):
         log_file = open(log_file_path, "w")
         subprocess.Popen([sys.executable, keepalive_path], stdout=log_file, stderr=log_file)

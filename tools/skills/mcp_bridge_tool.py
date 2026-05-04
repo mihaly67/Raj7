@@ -13,7 +13,7 @@ def run_mcp_tool(tool_name, tool_args):
              from vps_bridge import run_on_vps
         except:
              return "Hiba: vps_bridge nem talalhato a Python path-ban."
-             
+
     # A JSON payload escape-elése bash híváshoz, hogy a bonyolult stringek ne hasaljanak el.
     args_json = json.dumps(tool_args)
     safe_args = shlex.quote(args_json)
@@ -30,10 +30,10 @@ if __name__ == '__main__':
         sys.exit(1)
         
     tool = sys.argv[1]
-    
+
     # Primitiv parser, ami elfogadja pozíció alapján az argumentumokat, amit a rajtagok gyakran rontanak el kwargs-re
     args_dict = {}
-    
+
     if tool == 'execute_bash' and len(sys.argv) > 2:
          args_dict['command'] = sys.argv[2]
     elif tool == 'execute_python' and len(sys.argv) > 2:
@@ -46,6 +46,7 @@ if __name__ == '__main__':
     elif tool == 'search_rag_database' and len(sys.argv) > 3:
          args_dict['rag_name'] = sys.argv[2]
          args_dict['keyword'] = sys.argv[3]
+
          
     res = run_mcp_tool(tool, args_dict)
     print(res)
