@@ -47,5 +47,6 @@ if __name__ == '__main__':
          args_dict['rag_name'] = sys.argv[2]
          args_dict['keyword'] = sys.argv[3]
 
+         
     res = run_mcp_tool(tool, args_dict)
     print(res)
