@@ -6,6 +6,8 @@ import sqlite3
 import subprocess
 import requests
 import json
+import psutil
+import threading
 
 # ==========================================
 # JULES SWARM AGENT DAEMON (VPS NATIVE)
@@ -81,9 +83,48 @@ def execute_bash(cmd):
     except subprocess.CalledProcessError as e:
         return f"Hiba: {e.stderr} {e.stdout}"
 
+
+def heartbeat_code():
+    while True:
+        try:
+            conn = sqlite3.connect(SWARM_DB)
+            cursor = conn.cursor()
+            
+            # Memoria es CPU merese
+            process = psutil.Process(os.getpid())
+            mem_mb = process.memory_info().rss / (1024 * 1024)
+            cpu_pct = process.cpu_percent(interval=1.0)
+            
+            # Utolso hiba olvasasa a naplobol (ha van)
+            last_error = "None"
+            log_path = f"/home/misi/Swarm_Agents/{AGENT_ID}.log"
+            if os.path.exists(log_path):
+                with open(log_path, 'r') as logf:
+                    lines = logf.readlines()
+                    errors = [l for l in lines[-20:] if 'Hiba' in l or 'Kritikus' in l or 'Exception' in l]
+                    if errors:
+                        last_error = errors[-1].strip()[:100]
+            
+            cursor.execute('''INSERT INTO swarm_health (agent_id, status, last_error, cpu_usage_percent, mem_usage_mb, last_heartbeat) 
+                              VALUES (?, 'ALIVE', ?, ?, ?, CURRENT_TIMESTAMP)
+                              ON CONFLICT(agent_id) DO UPDATE SET 
+                              last_heartbeat=CURRENT_TIMESTAMP, status='ALIVE', last_error=?, cpu_usage_percent=?, mem_usage_mb=?''',
+                           (AGENT_ID, last_error, cpu_pct, mem_mb, last_error, cpu_pct, mem_mb))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Heartbeat hiba: {e}")
+            
+        time.sleep(15) # 15 masodpercenkent kuld eletjelet
+
 def main_loop():
     print(f"🚀 Swarm Daemon indul: {AGENT_ID}", flush=True)
     os.makedirs(WORKSPACE, exist_ok=True)
+    
+    # Heartbeat thread inditasa
+    hb_thread = threading.Thread(target=heartbeat_code, daemon=True)
+    hb_thread.start()
+
     
     while True:
         try:
