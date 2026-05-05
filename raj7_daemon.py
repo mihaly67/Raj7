@@ -62,7 +62,7 @@ def ask_ollama(prompt):
     
     try:
         # A CPU inference lassu, foleg 8B modellnel, igy 10 perces (600s) timeout kell
-        resp = requests.post(OLLAMA_URL, json=payload, timeout=600)
+        resp = requests.post(OLLAMA_URL, json=payload, timeout=1800)
         if resp.status_code == 200:
             return resp.json().get('response', 'Ures valasz az Ollamatol.')
         else:
