@@ -51,7 +51,7 @@ def complete_job(job_id, result_msg):
     conn.close()
 
 def ask_ollama(prompt):
-    time.sleep(random.randint(1, 30))
+    time.sleep(random.randint(5, 60))
     print(f"   [Ollama] Kérés indítása a {OLLAMA_MODEL} modellhez... (Ez CPU-n percekig is tarthat!)", flush=True)
     payload = {
         "model": OLLAMA_MODEL,
@@ -64,7 +64,7 @@ def ask_ollama(prompt):
     
     try:
         # A CPU inference lassu, foleg 8B modellnel, igy 10 perces (600s) timeout kell
-        resp = requests.post(OLLAMA_URL, json=payload, timeout=7200)
+        resp = requests.post(OLLAMA_URL, json=payload, timeout=18000)
         if resp.status_code == 200:
             return resp.json().get('response', 'Ures valasz az Ollamatol.')
         else:
