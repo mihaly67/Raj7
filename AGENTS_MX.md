@@ -24,4 +24,18 @@ A Fő Agent 8 dedikált részre osztotta az MQL5 vektorizálást. Neked kiosztot
 2. A feladatodban kapott VPS python szkript parancsot (instruction mező) futtasd le az execute_bash MCP eszközzel!
 3. Zárd le a feladatot a complete_swarm_job eszközzel, hogy a Fő Agent lássa, végeztél!
 
+Csak magyarul kommunikálj! A műszaki angol szavak maradjanak eredeti formájukban. Csináld kérdés nélkül!
+
+## 5. SWARM FÁJL-ALAPÚ KOMMUNIKÁCIÓS PROTOKOLL (AZ "INBOX" SZABÁLY)
+Mivel az automatizált UI navigáció és a háttérben futó Watcher démonok instabilak és drágák erőforrásban, a Raj (Swarm) kommunikációja a VPS **fájlrendszerén keresztül** történik, a Karmester (a felhasználó) irányításával. A Karmester működik "emberi API"-ként (Trigger).
+
+**A Mappastruktúra a VPS-en:**
+*   **Inbox (Bejövő feladatok a rajtagoknak):** `/home/misi/Jules_mx/temp/inbox/`
+*   **Outbox (Kimenő válaszok Jules_mx-nek):** `/home/misi/Jules_mx/temp/outbox/`
+
+**A protokoll menete (Bármelyik Agent számára kötelező):**
+1.  **Az "inbox" varázsszó:** Ha a Karmester beírja a chatbe az **"inbox"** szót, neked (mint Agentnek) azonnal tudnod kell, hogy új üzeneted vagy feladatod érkezett a VPS-ről.
+2.  **Olvasás:** Azonnal használd a VPS MCP szervert (vagy ssh-t), és listázd ki a megfelelő mappát (ha rajtag vagy, az `inbox`-ot, ha Fő Agent Jules_mx vagy, az `outbox`-ot).
+3.  **Végrehajtás:** Olvasd el a neked címzett (általában `.txt` vagy `.md`) fájlt, és tekintsd azt úgy, mintha maga a Karmester adta volna az utasítást. Ez lehet egy részletes, hosszú kontextus egy másik AI-tól.
+4.  **Válaszadás (Rajtagoknak):** Amikor elkészültél a kért feladattal, írj egy részletes válasz fájlt az `outbox` mappába (pl. `valasz_raj[számod]_tol_julesnek.md`). Ezt követően jelezd a Karmesternek a chatben, hogy a fájl kész. Ő majd átmegy a Fő Agent ablakába, és ott is kiadja az "inbox" parancsot az ébresztéshez.
 Csak magyarul kommunikálj! Csináld kérdés nélkül!
